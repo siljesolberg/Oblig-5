@@ -1,12 +1,26 @@
 {% extends 'base.html' %}
-<!-- Skriv inn din kode her for å returnere svar for bruksscenario om svar på en søknad. --> 
 {% block content %}
+<html>
+
+<head>
+<h1>Du har fått tilbud om plass i Sunshine Preschool!</h1>	
+</head>
+
+ <body>
+
+<p>Det er 15 ledige plasser igjen.</p>
 <table border=1>
-	{% for k,v in data.items() %}
+
 	<tr>
-		<th>{{ k }}</th>
-		<td>{{ v }}</td>
+		<th>Aksepter tilbud</th>
+		<td>Avslå tilbud</td>
 	</tr>
-	{% endfor %}
+
 </table>
+
+<p>På grunn av fortrinnrett "Barnevern" blir denne plassen reservert til ditt barn inntil svar på tilbud.</p>
+
+ </body>
+
+</html>
 {% endblock %}
