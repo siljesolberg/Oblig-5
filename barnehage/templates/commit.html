@@ -1,5 +1,26 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<p>Alle endringene er skrevet til dbexcel!</p>
+{% for sheet_name, rows in data.items() %}
+    <h2>{{ sheet_name }}</h2>
+    {% if rows %}
+        <table border="1">
+            <tr>
+                {% for key in rows[0].keys() %}
+                    <th>{{ key }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in rows %}
+            <tr>
+                {% for value in row.values() %}
+                    <td>{{ value }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No data available for {{ sheet_name }}.</p>
+    {% endif %}
+    <br>
+{% endfor %}
 {% endblock %}
