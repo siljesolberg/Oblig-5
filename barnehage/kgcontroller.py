@@ -26,18 +26,18 @@ def insert_foresatt(f):
         new_id = 1
     else:
         new_id = forelder['foresatt_id'].max() + 1
-    
+
     # skriv kode for å unngå duplikater
-    
+
     forelder = pd.concat([pd.DataFrame([[new_id,
                                         f.foresatt_navn,
                                         f.foresatt_adresse,
                                         f.foresatt_tlfnr,
                                         f.foresatt_pnr]],
-                columns=forelder.columns), forelder], ignore_index=True)
-    
-    
+                                       columns=forelder.columns), forelder], ignore_index=True)
+
     return forelder
+
 
 def insert_barn(b):
     global barn
@@ -46,14 +46,15 @@ def insert_barn(b):
         new_id = 1
     else:
         new_id = barn['barn_id'].max() + 1
-    
+
     # burde også sjekke for samme foresatt_pnr for å unngå duplikater
-    
+
     barn = pd.concat([pd.DataFrame([[new_id,
                                     b.barn_pnr]],
-                columns=barn.columns), barn], ignore_index=True)
-    
+                                   columns=barn.columns), barn], ignore_index=True)
+
     return barn
+
 
 def insert_soknad(s):
     """[sok_id, foresatt_1, foresatt_2, barn_1, fr_barnevern, fr_sykd_familie,
@@ -66,10 +67,9 @@ def insert_soknad(s):
         new_id = 1
     else:
         new_id = soknad['sok_id'].max() + 1
-    
-    
+
     # burde også sjekke for duplikater
-    
+
     soknad = pd.concat([pd.DataFrame([[new_id,
                                      s.foresatt_1.foresatt_id,
                                      s.foresatt_2.foresatt_id,
@@ -82,20 +82,22 @@ def insert_soknad(s):
                                      s.sosken__i_barnehagen,
                                      s.tidspunkt_oppstart,
                                      s.brutto_inntekt]],
-                columns=soknad.columns), soknad], ignore_index=True)
-    
+                                     columns=soknad.columns), soknad], ignore_index=True)
+
     return soknad
 
 # ---------------------------
 # Read (select)
 
+
 def select_alle_barnehager():
     """Returnerer en liste med alle barnehager definert i databasen dbexcel."""
     return barnehage.apply(lambda r: Barnehage(r['barnehage_id'],
-                             r['barnehage_navn'],
-                             r['barnehage_antall_plasser'],
-                             r['barnehage_ledige_plasser']),
-         axis=1).to_list()
+                                               r['barnehage_navn'],
+                                               r['barnehage_antall_plasser'],
+                                               r['barnehage_ledige_plasser']),
+                           axis=1).to_list()
+
 
 def select_foresatt(f_navn):
     """OBS! Ignorerer duplikater"""
@@ -103,7 +105,8 @@ def select_foresatt(f_navn):
     if series.empty:
         return np.nan
     else:
-        return series.iloc[0] # returnerer kun det første elementet i series
+        return series.iloc[0]  # returnerer kun det første elementet i series
+
 
 def select_barn(b_pnr):
     """OBS! Ignorerer duplikater"""
@@ -111,27 +114,26 @@ def select_barn(b_pnr):
     if series.empty:
         return np.nan
     else:
-        return series.iloc[0] # returnerer kun det første elementet i series
-    
-    
+        return series.iloc[0]  # returnerer kun det første elementet i series
+
+
 # --- Skriv kode for select_soknad her
 
 
 def select_alle_soknader():
     return soknad.apply(lambda r: Soknad(r['sok_id'],
-                             r['foresatt_1'],   
-                             r['foresatt_2'],
-                             r['barn_1'],
-                             r['fr_barnevern'],
-                             r['fr_sykd_familie'],
-                             r['fr_sykd_barn'],
-                             r['fr_annet'],
-                             r['barnehager_prioritert'],
-                             r['sosken__i_barnehagen'],
-                             r['tidspunkt_oppstart'],
-                             r['brutto_inntekt']),
-         axis=1).to_list()
-
+                                         r['foresatt_1'],
+                                         r['foresatt_2'],
+                                         r['barn_1'],
+                                         r['fr_barnevern'],
+                                         r['fr_sykd_familie'],
+                                         r['fr_sykd_barn'],
+                                         r['fr_annet'],
+                                         r['barnehager_prioritert'],
+                                         r['sosken__i_barnehagen'],
+                                         r['tidspunkt_oppstart'],
+                                         r['brutto_inntekt']),
+                        axis=1).to_list()
 
 
 # ------------------
@@ -144,14 +146,26 @@ def select_alle_soknader():
 
 # ----- Persistent lagring ------
 def commit_all():
-    """Skriver alle dataframes til excel"""
-    with pd.ExcelWriter('kgdata.xlsx', mode='a', if_sheet_exists='replace') as writer:  
+    """Writes all DataFrames to Excel, replacing sheets if they already exist."""
+    with pd.ExcelWriter('kgdata.xlsx', mode='a', engine='openpyxl', if_sheet_exists='replace') as writer:
         forelder.to_excel(writer, sheet_name='foresatt')
         barnehage.to_excel(writer, sheet_name='barnehage')
         barn.to_excel(writer, sheet_name='barn')
         soknad.to_excel(writer, sheet_name='soknad')
-        
+
+
+excel_data = pd.read_excel("kgdata.xlsx", sheet_name=None)
+
+
+def get_all_data():
+    # Convert each DataFrame to a list of dictionaries
+    data = {sheet_name: sheet_df.to_dict(
+        orient='records') for sheet_name, sheet_df in excel_data.items()}
+    return data
+
 # --- Diverse hjelpefunksjoner ---
+
+
 def form_to_object_soknad(sd):
     """sd - formdata for soknad, type: ImmutableMultiDict fra werkzeug.datastructures
 Eksempel:
@@ -185,19 +199,19 @@ ImmutableMultiDict([('navn_forelder_1', 'asdf'),
                           sd.get('adresse_forelder_2'),
                           sd.get('tlf_nr_forelder_2'),
                           sd.get('personnummer_forelder_2'))
-    insert_foresatt(foresatt_2) 
-    
+    insert_foresatt(foresatt_2)
+
     # Dette er ikke elegang; kunne returnert den nye id-en fra insert_ metodene?
     foresatt_1.foresatt_id = select_foresatt(sd.get('navn_forelder_1'))
     foresatt_2.foresatt_id = select_foresatt(sd.get('navn_forelder_2'))
-    
+
     # Lagring i hurtigminne av informasjon om barn (OBS! kun ett barn blir lagret)
     barn_1 = Barn(0, sd.get('personnummer_barnet_1'))
     insert_barn(barn_1)
     barn_1.barn_id = select_barn(sd.get('personnummer_barnet_1'))
-    
+
     # Lagring i hurtigminne av all informasjon for en søknad (OBS! ingen feilsjekk / alternativer)
-        
+
     sok_1 = Soknad(0,
                    foresatt_1,
                    foresatt_2,
@@ -210,13 +224,15 @@ ImmutableMultiDict([('navn_forelder_1', 'asdf'),
                    sd.get('har_sosken_som_gaar_i_barnehagen'),
                    sd.get('tidspunkt_for_oppstart'),
                    sd.get('brutto_inntekt_husholdning'))
-    
+
     return sok_1
 
 # Testing
+
+
 def test_df_to_object_list():
     assert barnehage.apply(lambda r: Barnehage(r['barnehage_id'],
-                             r['barnehage_navn'],
-                             r['barnehage_antall_plasser'],
-                             r['barnehage_ledige_plasser']),
-         axis=1).to_list()[0].barnehage_navn == "Sunshine Preschool"
+                                               r['barnehage_navn'],
+                                               r['barnehage_antall_plasser'],
+                                               r['barnehage_ledige_plasser']),
+                           axis=1).to_list()[0].barnehage_navn == "Sunshine Preschool"

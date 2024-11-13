@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<html>
-<body>
 
-<img src="oppgave2g.png" width="104" height="142">
+<h2>Grafikk for utvikling i Vega kommune</h2>
+<h3>2015-2023</h3>
+<img src="{{url_for('static', filename='images/VegaChart.pdf')}}" width="600" />
+<h2>Prosent barn i ett til to års alderen som går i barnehage i Vega kommune 2015-2023.</h2>
 
-</body>
-</html>
 
 {% endblock %}

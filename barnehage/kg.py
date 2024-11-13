@@ -8,7 +8,7 @@ from kgmodel import (Foresatt, Barn, Soknad, Barnehage)
 from kgcontroller import (form_to_object_soknad,
                           insert_soknad, commit_all,
                           select_alle_barnehager,
-                          select_alle_soknader,)
+                          select_alle_soknader,get_all_data)
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY' # nødvendig for session
@@ -42,11 +42,12 @@ def svar():
 @app.route('/commit')
 def commit():
     commit_all()
-    return render_template('commit.html')
+    information = get_all_data()
+    return render_template('commit.html', data=information)
 
 @app.route('/soknader')
 def soknader():
-    soknader = select_alle_soknader()
+    information = select_alle_soknader()
     return render_template('soknader.html', soknader=information)
 
 @app.route('/statistikk')
