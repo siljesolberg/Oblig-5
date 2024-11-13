@@ -52,7 +52,8 @@ def soknader():
 
 @app.route('/statistikk')
 def statistikk():
-    return render_template('statistikk.html')
+    information = select_alle_soknader()
+    return render_template('statistikk.html', soknader=information)
 
 
 
