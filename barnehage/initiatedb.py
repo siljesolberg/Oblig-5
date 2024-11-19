@@ -50,12 +50,6 @@ def initiate_db(db_name):
         barn.to_excel(writer, sheet_name='barn')
         soknad.to_excel(writer, sheet_name='soknad')
     
-    """
-    b1 = Barn(1, "09012356472")
-    f1 = Foresatt(1, "Ole Nordmann", "Bekkeveien 100", "98434344", "09079089332")
-    f2 = Foresatt(2, "Solveig Imsdal", "Bekkeveien 100", "98434312", "09079233221")
-    """
-
 initiate_db("kgdata.xlsx")
 
 
